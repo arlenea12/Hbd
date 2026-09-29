@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Birthday Surprise</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: "Trebuchet MS", Arial, sans-serif;
+    background: #fff8df;
+    color: #222;
+    overflow: hidden;
+}
+
+.page {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 25px;
+}
+
+.card {
+    width: min(650px, 95vw);
+    min-height: 520px;
+
+    background: white;
+
+    border: 4px solid #222;
+    border-radius: 28px;
+
+    box-shadow: 12px 12px 0 #f3cf49;
+
+    padding: 35px;
+
+    text-align: center;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    position: relative;
+}
+
+h1 {
+    font-size: clamp(3rem, 8vw, 5rem);
+    line-height: .9;
+
+    color: #e9504f;
+
+    text-shadow: 3px 3px 0 #222;
+
+    margin: 15px 0;
+}
+
+h2 {
+    font-size: clamp(2rem, 5vw, 3rem);
+    margin: 10px;
+}
+
+p {
+    font-size: 1.15rem;
+    line-height: 1.5;
+    max-width: 500px;
+}
+
+
+/* -------------------------
+   SNOOPY GIFS
+-------------------------- */
+
+.snoopy {
+    width: min(320px, 75vw);
+    max-height: 230px;
+
+    object-fit: contain;
+
+    border: 3px solid #222;
+    border-radius: 18px;
+
+    box-shadow: 6px 6px 0 #f3cf49;
+
+    margin-bottom: 20px;
+}
+
+
+/* -------------------------
+   BUTTONS
+-------------------------- */
+
+button {
+    border: 3px solid #222;
+    border-radius: 100px;
+
+    padding: 14px 26px;
+
+    background: #f3cf49;
+
+    font-size: 1rem;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    box-shadow: 5px 5px 0 #222;
+
+    margin: 10px;
+
+    transition:
+        left 0.7s ease-in-out,
+        top 0.7s ease-in-out,
+        transform 0.15s,
+        box-shadow 0.15s;
+}
+
+button:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 7px 7px 0 #222;
+}
+
+button:active {
+    transform: translate(4px, 4px);
+    box-shadow: 1px 1px 0 #222;
+}
+
+.red {
+    background: #e9504f;
+    color: white;
+}
+
+.blue {
+    background: #8ed3ef;
+}
+
+
+/* -------------------------
+   PROGRESS DOTS
+-------------------------- */
+
+.progress {
+    display: flex;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.dot {
+    width: 11px;
+    height: 11px;
+
+    border: 2px solid #222;
+    border-radius: 50%;
+
+    background: white;
+}
+
+.dot.active {
+    background: #e9504f;
+}
+
+
+/* -------------------------
+   BIRTHDAY MESSAGE
+-------------------------- */
+
+.message {
+    border: 3px dashed #222;
+    border-radius: 18px;
+
+    padding: 20px;
+
+    margin-top: 10px;
+
+    max-width: 500px;
+}
+
+
+/* -------------------------
+   CONFETTI
+-------------------------- */
+
+.confetti {
+    position: fixed;
+
+    width: 10px;
+    height: 16px;
+
+    top: -20px;
+
+    animation: fall linear forwards;
+
+    z-index: 100;
+}
+
+@keyframes fall {
+
+    to {
+        transform:
+            translateY(110vh)
+            rotate(720deg);
+    }
+
+}
+
+
+/* -------------------------
+   CARD POP ANIMATION
+-------------------------- */
+
+.pop {
+    animation: pop .4s ease;
+}
+
+@keyframes pop {
+
+    0% {
+        transform: scale(.7);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+}
+
+
+/* -------------------------
+   MOBILE
+-------------------------- */
+
+@media(max-width: 500px) {
+
+    .card {
+        padding: 25px 18px;
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div class="page">
+
+    <div class="card">
+
+        <div id="content">
+
+            <h2>
+                pssst...
+            </h2>
+
+            <p>
+                I heard there might be a birthday
+                happening around here.
+            </p>
+
+            <button onclick="next(1)">
+                I know nothing...
+            </button>
+
+        </div>
+
+
+        <div
+            class="progress"
+            id="progress">
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<script>
+
+
+let step = 0;
+
+
+const content =
+    document.getElementById("content");
+
+
+const progress =
+    document.getElementById("progress");
+
+
+
+/* ==================================
+   PROGRESS DOTS
+================================== */
+
+function dots(number) {
+
+    progress.innerHTML = "";
+
+
+    for (let i = 0; i < 5; i++) {
+
+        const dot =
+            document.createElement("div");
+
+
+        dot.className =
+            "dot" +
+            (i < number ? " active" : "");
+
+
+        progress.appendChild(dot);
+
+    }
+
+}
+
+
+dots(0);
+
+
+
+/* ==================================
+   CARD ANIMATION
+================================== */
+
+function animateCard() {
+
+    content.classList.remove("pop");
+
+    void content.offsetWidth;
+
+    content.classList.add("pop");
+
+}
+
+
+
+/* ==================================
+   SCREENS
+================================== */
+
+function next(number) {
+
+    step = number;
+
+    dots(number);
+
+    animateCard();
+
+
+
+    /* -------------------------
+       SCREEN 1
+    -------------------------- */
+
+    if (number === 1) {
+
+        content.innerHTML = `
+
+            <h2>
+                Wait a minute...
+            </h2>
+
+
+            <p>
+                Before you continue,
+                I need to verify something
+                extremely important.
+            </p>
+
+
+            <p>
+                <strong>
+                    Is it actually your birthday?
+                </strong>
+            </p>
+
+
+            <button
+                class="red"
+                onclick="next(2)">
+
+                YES
+
+            </button>
+
+
+            <button
+                onclick="next(2)">
+
+                Obviously
+
+            </button>
+
+        `;
+
+    }
+
+
+
+    /* -------------------------
+       SCREEN 2
+    -------------------------- */
+
+    else if (number === 2) {
+
+        content.innerHTML = `
+
+            <img
+                src="snoopy-silly.gif"
+                class="snoopy"
+                alt="Snoopy">
+
+
+            <h2>
+                Hmmmm... suspicious.
+            </h2>
+
+
+            <p>
+                Snoopy says anybody can
+                just say it's their birthday.
+            </p>
+
+
+            <p>
+                You're going to have
+                to prove it.
+            </p>
+
+
+            <button
+                class="blue"
+                onclick="next(3)">
+
+                How?!
+
+            </button>
+
+        `;
+
+    }
+
+
+
+    /* -------------------------
+       SCREEN 3
+       RUNAWAY BUTTON
+    -------------------------- */
+
+    else if (number === 3) {
+
+        content.innerHTML = `
+
+            <img
+                src="snoopy-silly.gif"
+                class="snoopy"
+                alt="Snoopy">
+
+
+            <h2>
+                Easy.
+            </h2>
+
+
+            <p>
+                All you have to do is
+                click this button.
+
+                <br>
+
+                How hard could it be?
+            </p>
+
+
+            <button
+                class="red"
+                id="runButton">
+
+                PROVE IT
+
+            </button>
+
+
+            <p id="taunt">
+                Go ahead.
+                It's literally right there.
+            </p>
+
+        `;
+
+
+        setupRunningButton();
+
+    }
+
+
+
+    /* -------------------------
+       SCREEN 4
+    -------------------------- */
+
+    else if (number === 4) {
+
+        content.innerHTML = `
+
+            <img
+                src="dancing-snoopy.gif"
+                class="snoopy"
+                alt="Dancing Snoopy">
+
+
+            <h2>
+                Okay, okay.
+            </h2>
+
+
+            <p>
+                You passed the highly scientific
+                birthday verification process.
+            </p>
+
+
+            <p>
+                There is just
+
+                <strong>
+                    one last button.
+                </strong>
+            </p>
+
+
+            <button
+                onclick="next(5)">
+
+                Fine, give it to me
+
+            </button>
+
+        `;
+
+    }
+
+
+
+    /* -------------------------
+       FINAL SCREEN
+    -------------------------- */
+
+    else if (number === 5) {
+
+        reveal();
+
+    }
+
+}
+
+
+
+/* ==========================================
+   RIDICULOUS RUNAWAY BUTTON
+========================================== */
+
+function setupRunningButton() {
+
+    const button =
+        document.getElementById("runButton");
+
+
+    const taunt =
+        document.getElementById("taunt");
+
+
+    let attempts = 0;
+
+    let moving = false;
+
+
+
+    const messages = [
+
+        "Too slow.",
+
+        "Not even close.",
+
+        "Why are you chasing me?",
+
+        "Almost...",
+
+        "Snoopy says try harder.",
+
+        "You're really committed to this.",
+
+        "Okay, this is getting embarrassing."
+
+    ];
+
+
+
+    function escapeButton() {
+
+
+        /*
+        Don't trigger another move
+        while the button is already
+        flying across the screen.
+        */
+
+        if (moving || attempts >= 7) {
+            return;
+        }
+
+
+        moving = true;
+
+
+
+        /*
+        Give them 0.15 seconds
+        of false hope before
+        the button escapes.
+        */
+
+        setTimeout(() => {
+
+
+            /*
+            Free the button from
+            the birthday card.
+            */
+
+            button.style.position =
+                "fixed";
+
+
+            button.style.zIndex =
+                "9999";
+
+
+            button.style.margin =
+                "0";
+
+
+            button.style.transform =
+                "none";
+
+
+            /*
+            Slow glide instead
+            of teleporting.
+            */
+
+            button.style.transition =
+                "left 0.45s ease-in-out, " +
+                "top 0.45s ease-in-out";
+
+
+            const padding = 30;
+
+
+            const buttonWidth =
+                button.offsetWidth;
+
+
+            const buttonHeight =
+                button.offsetHeight;
+
+
+
+            const maxX =
+                Math.max(
+
+                    padding,
+
+                    window.innerWidth -
+                    buttonWidth -
+                    padding
+
+                );
+
+
+
+            const maxY =
+                Math.max(
+
+                    padding,
+
+                    window.innerHeight -
+                    buttonHeight -
+                    padding
+
+                );
+
+
+
+            /*
+            Make the button travel
+            to increasingly ridiculous
+            parts of the screen.
+            */
+
+            const locations = [
+
+
+                /*
+                1 — TOP LEFT
+                */
+
+                [
+                    padding,
+                    padding
+                ],
+
+
+                /*
+                2 — BOTTOM RIGHT
+                */
+
+                [
+                    maxX,
+                    maxY
+                ],
+
+
+                /*
+                3 — TOP RIGHT
+                */
+
+                [
+                    maxX,
+                    padding
+                ],
+
+
+                /*
+                4 — BOTTOM LEFT
+                */
+
+                [
+                    padding,
+                    maxY
+                ],
+
+
+                /*
+                5 — RANDOM RIGHT SIDE
+                */
+
+                [
+                    window.innerWidth * .75,
+                    window.innerHeight * .40
+                ],
+
+
+                /*
+                6 — RANDOM LEFT SIDE
+                */
+
+                [
+                    window.innerWidth * .15,
+                    window.innerHeight * .60
+                ],
+
+
+                /*
+                7 — COMPLETELY RANDOM
+                */
+
+                [
+                    padding +
+                    Math.random() *
+                    Math.max(
+                        0,
+                        maxX - padding
+                    ),
+
+                    padding +
+                    Math.random() *
+                    Math.max(
+                        0,
+                        maxY - padding
+                    )
+                ]
+
+            ];
+
+
+
+            let x =
+                locations[attempts][0];
+
+
+            let y =
+                locations[attempts][1];
+
+
+
+            /*
+            Make absolutely sure
+            it remains visible.
+            */
+
+            x =
+                Math.min(
+
+                    Math.max(
+                        padding,
+                        x
+                    ),
+
+                    maxX
+
+                );
+
+
+            y =
+                Math.min(
+
+                    Math.max(
+                        padding,
+                        y
+                    ),
+
+                    maxY
+
+                );
+
+
+
+            /*
+            SEND IT FLYING.
+            */
+
+            button.style.left =
+                x + "px";
+
+
+            button.style.top =
+                y + "px";
+
+
+
+            /*
+            Change the insult.
+            */
+
+            taunt.textContent =
+                messages[attempts];
+
+
+
+            attempts++;
+
+
+
+            /*
+            Wait for the button
+            to finish moving.
+            */
+
+            setTimeout(() => {
+
+
+                moving = false;
+
+
+
+                /*
+                After seven escapes,
+                Snoopy finally gives up.
+                */
+
+                if (attempts >= 7) {
+
+
+                    button.removeEventListener(
+                        "mouseenter",
+                        escapeButton
+                    );
+
+
+                    button.removeEventListener(
+                        "touchstart",
+                        escapeButton
+                    );
+
+
+
+                    /*
+                    Give them a second
+                    to appreciate their
+                    victory.
+                    */
+
+                    setTimeout(() => {
+
+
+                        /*
+                        Return button
+                        to the card.
+                        */
+
+                        button.style.transition =
+                            "all 0.7s ease-in-out";
+
+
+                        button.style.position =
+                            "static";
+
+
+                        button.style.left =
+                            "";
+
+
+                        button.style.top =
+                            "";
+
+
+                        button.style.zIndex =
+                            "";
+
+
+                        button.style.margin =
+                            "10px";
+
+
+                        button.style.transform =
+                            "";
+
+
+
+                        taunt.textContent =
+                            "Okay, okay. You win. Click it.";
+
+
+
+                        /*
+                        NOW it actually works.
+                        */
+
+                        button.onclick =
+                            () => next(4);
+
+
+                    }, 700);
+
+                }
+
+
+            }, 500);
+
+
+        }, 75);
+
+    }
+
+
+
+    /*
+    DESKTOP:
+    Run when they try
+    hovering over it.
+    */
+
+    button.addEventListener(
+        "mouseenter",
+        escapeButton
+    );
+
+
+
+    /*
+    MOBILE:
+    Run when they touch it.
+    */
+
+    button.addEventListener(
+        "touchstart",
+        escapeButton,
+        {
+            passive: true
+        }
+    );
+
+}
+
+
+
+/* ==================================
+   FINAL BIRTHDAY SCREEN
+================================== */
+
+function reveal() {
+
+
+    progress.style.display =
+        "none";
+
+
+
+    content.innerHTML = `
+
+
+        <img
+            src="happy-birthday-snoopy.gif"
+            class="snoopy"
+            alt="Happy Birthday Snoopy">
+
+
+
+        <h1>
+
+            HAPPY
+
+            <br>
+
+            BIRTHDAY!
+
+        </h1>
+
+
+
+        <p>
+            YOU MADE IT!
+        </p>
+
+
+
+        <div class="message">
+
+
+            Wishing you a very
+            Happy Birthday!
+
+
+            <br><br>
+
+
+            Hope you have a wonderful
+            day and get the chance to
+            celebrate and enjoy your
+            special day.
+
+
+            <br><br>
+
+
+            <strong>
+                Happy Birthday! 🎂
+            </strong>
+
+
+        </div>
+
+
+
+        <button
+            class="red"
+            onclick="confetti(100)">
+
+            MORE CONFETTI
+
+        </button>
+
+
+    `;
+
+
+
+    confetti(150);
+
+}
+
+
+
+/* ==================================
+   CONFETTI
+================================== */
+
+function confetti(amount) {
+
+
+    const colors = [
+
+        "#e9504f",
+
+        "#f3cf49",
+
+        "#8ed3ef",
+
+        "#222",
+
+        "#f4a6bf"
+
+    ];
+
+
+
+    for (
+        let i = 0;
+        i < amount;
+        i++
+    ) {
+
+
+        const piece =
+            document.createElement(
+                "div"
+            );
+
+
+
+        piece.className =
+            "confetti";
+
+
+
+        piece.style.left =
+            Math.random() *
+            100 +
+            "vw";
+
+
+
+        piece.style.background =
+            colors[
+
+                Math.floor(
+
+                    Math.random() *
+                    colors.length
+
+                )
+
+            ];
+
+
+
+        piece.style.animationDuration =
+            (
+                2 +
+                Math.random() * 3
+            ) +
+            "s";
+
+
+
+        piece.style.animationDelay =
+            Math.random() +
+            "s";
+
+
+
+        document.body.appendChild(
+            piece
+        );
+
+
+
+        setTimeout(
+
+            () =>
+                piece.remove(),
+
+            6000
+
+        );
+
+    }
+
+}
+
+
+</script>
+
+
+</body>
+
+</html>
